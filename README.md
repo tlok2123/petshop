@@ -31,7 +31,7 @@ php artisan jwt:secret
 php artisan serve --host=0.0.0.0 --port=8000
 ```
 
-## 3. Kiểm thửa với Front-end hoặc Postman
+## 3. Kiểm thử với Front-end hoặc Postman
 
 Chúc các bạn thành công! Có khó khăn hãy liên hệ:
 
