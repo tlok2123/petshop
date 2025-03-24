@@ -27,6 +27,7 @@ class ProductController extends Controller
 
     public function store(Request $request)
     {
+
         $request->validate([
             'name' => 'required|string|max:255',
             'price' => 'required|integer|min:0',
@@ -35,6 +36,7 @@ class ProductController extends Controller
             'description' => 'required|string',
             'photo' => 'nullable|image|mimes:jpg,png,jpeg|max:2048',
         ]);
+
 
         $photoPath = null;
         if ($request->hasFile('photo')) {
@@ -75,6 +77,7 @@ class ProductController extends Controller
             'description' => 'required|string',
             'photo' => 'nullable|image|mimes:jpg,png,jpeg|max:2048',
         ]);
+
 
         $updateData = $request->only(['name', 'price', 'category_id', 'stock', 'description']);
 

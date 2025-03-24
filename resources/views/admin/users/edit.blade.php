@@ -14,7 +14,7 @@
             </div>
         @endif
 
-        <form action="{{ route('admin.users.update', $user) }}" method="POST" enctype="multipart/form-data">
+        <form action="{{ route('admin.users.update', $user) }}" method="POST" enctype="multipart/form-data" id="editUserForm">
             @csrf
             @method('PUT')
 
@@ -48,10 +48,10 @@
 
             <div class="mb-3">
                 <label for="avatar" class="form-label">Ảnh đại diện:</label>
-                <input type="file" name="avatar" id="avatar" class="form-control">
+                <input type="file" name="avatar" id="avatar" class="form-control" accept="image/*">
                 @if($user->avatar)
                     <div class="mt-2">
-                        <img src="{{ asset('storage/' . $user->avatar) }}" alt="Avatar" class="rounded" width="100">
+                        <img src="{{ asset('storage/' . $user->avatar) }}" alt="Avatar" class="rounded img-thumbnail" width="100">
                     </div>
                 @endif
             </div>
@@ -60,4 +60,22 @@
             <a href="{{ route('admin.users.index') }}" class="btn btn-secondary">Hủy</a>
         </form>
     </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            document.getElementById("avatar").addEventListener("change", function(event) {
+                let file = event.target.files[0]; // Lấy file đầu tiên
+
+                if (file) {
+                    let allowedExtensions = ["jpg", "jpeg", "png"]; // Định dạng hợp lệ
+                    let fileExtension = file.name.split('.').pop().toLowerCase(); // Lấy phần mở rộng file
+
+                    if (!allowedExtensions.includes(fileExtension)) {
+                        alert("❌ Định dạng ảnh không hợp lệ! Chỉ hỗ trợ JPG, JPEG, PNG.");
+                        event.target.value = ""; // Xóa file vừa chọn
+                    }
+                }
+            });
+        });
+    </script>
 @endsection

@@ -9,7 +9,7 @@
                         <h3>Thêm sản phẩm</h3>
                     </div>
                     <div class="card-body">
-                        <form action="{{ route('admin.product.store') }}" method="POST" enctype="multipart/form-data">
+                        <form action="{{ route('admin.product.store') }}" method="POST" enctype="multipart/form-data" id="productForm">
                             @csrf
 
                             <div class="mb-3">
@@ -43,7 +43,7 @@
 
                             <div class="mb-3">
                                 <label class="form-label">Hình ảnh sản phẩm</label>
-                                <input type="file" name="photo" class="form-control" accept="image/*">
+                                <input type="file" id="photo" name="photo" class="form-control" accept="image/*">
                             </div>
 
                             <div class="text-center">
@@ -56,4 +56,22 @@
             </div>
         </div>
     </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            document.getElementById("photo").addEventListener("change", function(event) {
+                let file = event.target.files[0]; // Lấy file đầu tiên
+
+                if (file) {
+                    let allowedExtensions = ["jpg", "jpeg", "png"]; // Định dạng hợp lệ
+                    let fileExtension = file.name.split('.').pop().toLowerCase(); // Lấy phần mở rộng file
+
+                    if (!allowedExtensions.includes(fileExtension)) {
+                        alert("❌ Định dạng ảnh không hợp lệ! Chỉ hỗ trợ JPG, JPEG, PNG.");
+                        event.target.value = ""; // Xóa file vừa chọn
+                    }
+                }
+            });
+        });
+    </script>
 @endsection
