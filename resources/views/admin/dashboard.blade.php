@@ -16,7 +16,7 @@
                 <a href="{{ route('admin.users.index') }}" class="btn btn-success mt-3">
                     <i class="bi bi-people"></i> Quản lý người dùng
                 </a>
-                <a href="{{ route('admin.pet.index') }}" class="btn btn-warning mt-3">
+                <a href="{{ route('admin.pets.index') }}" class="btn btn-warning mt-3">
                     <i class="bi bi-heart"></i> Quản lý thú cưng
                 </a>
             </div>

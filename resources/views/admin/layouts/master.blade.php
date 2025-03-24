@@ -53,7 +53,9 @@
 
 <!-- Sidebar -->
 <div class="sidebar">
-    <h4 class="text-center">Admin Panel</h4>
+    <div class="text-center">
+        <img src="{{ asset('storage/32216739.jpg') }}" alt="Admin Logo" class="img-fluid" style="max-width: 150px;">
+    </div>
     <a href="{{ route('admin.dashboard') }}" class="{{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
         <i class="bi bi-house-door"></i> Trang chủ
     </a>
@@ -66,7 +68,7 @@
     <a href="{{ route('admin.users.index') }}" class="{{ request()->routeIs('admin.users.index') ? 'active' : '' }}">
         <i class="bi bi-people"></i> Người dùng
     </a>
-    <a href="{{ route('admin.pet.index') }}" class="{{ request()->routeIs('admin.pet.index') ? 'active' : '' }}">
+    <a href="{{ route('admin.pets.index') }}" class="{{ request()->routeIs('admin.pets.index') ? 'active' : '' }}">
         <i class="bi bi-heart"></i> Thú cưng
     </a>
 </div>

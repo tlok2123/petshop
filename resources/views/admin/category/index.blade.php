@@ -28,6 +28,9 @@
                             <td>{{ $category->id }}</td>
                             <td>{{ $category->name }}</td>
                             <td>
+                                <a href="{{ route('admin.category.show', $category) }}" class="btn btn-info btn-sm">
+                                    <i class="bi bi-eye"></i> Xem
+                                </a>
                                 <a href="{{ route('admin.category.edit', $category->id) }}" class="btn btn-warning btn-sm">
                                     <i class="bi bi-pencil-square"></i> Chỉnh sửa
                                 </a>

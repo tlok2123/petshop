@@ -30,13 +30,13 @@ class Pet extends Model
         return $this->belongsTo(User::class);
     }
 
-    public function isDog(): bool
+    public function speciesLabel(): string
     {
-        return $this->species === 1;
+        return [
+            1 => 'Chó',
+            2 => 'Mèo',
+            3 => 'Khác',
+        ][$this->species] ?? 'Không xác định';
     }
 
-    public function isCat(): bool
-    {
-        return $this->species === 2;
-    }
 }

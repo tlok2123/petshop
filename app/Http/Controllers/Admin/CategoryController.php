@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Category;
+use App\Models\Pet;
 use Illuminate\Http\Request;
 
 class CategoryController extends Controller
@@ -33,6 +34,12 @@ class CategoryController extends Controller
     public function edit(Category $category)
     {
         return view('admin.category.edit', compact('category'));
+    }
+
+    public function show($id)
+    {
+        $category = Category::findOrFail($id); // Tìm danh mục theo ID
+        return view('admin.category.show', compact('category')); // Truyền dữ liệu vào view
     }
 
     public function update(Request $request, Category $category)

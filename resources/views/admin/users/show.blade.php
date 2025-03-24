@@ -24,7 +24,20 @@
                             {{ $user->role == 1 ? 'Admin' : 'Khách hàng' }}
                         </span>
                     </p>
-                    <a href="{{ route('admin.users.index') }}" class="btn btn-outline-secondary mt-3">Quay lại</a>
+                    <div class="text-center mt-4">
+                        <a href="{{ route('admin.users.index') }}" class="btn btn-secondary px-4">Quay lại danh sách</a>
+                        <a href="{{ route('admin.users.edit', $user) }}" class="btn btn-warning px-4">
+                            <i class="bi bi-pencil-square"></i> Chỉnh sửa
+                        </a>
+                        <form action="{{ route('admin.users.destroy', $user) }}" method="POST" class="d-inline">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit" class="btn btn-danger px-4"
+                                    onclick="return confirm('Bạn có chắc chắn muốn xóa người dùng này?')">
+                                <i class="bi bi-trash"></i> Xóa
+                            </button>
+                        </form>
+                    </div>
                 </div>
             </div>
         </div>
