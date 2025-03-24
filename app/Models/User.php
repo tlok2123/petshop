@@ -2,24 +2,17 @@
 
 namespace App\Models;
 
- use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use Laravel\Sanctum\HasApiTokens;
+use Tymon\JWTAuth\Contracts\JWTSubject; // ✅ Import JWTSubject
 use App\Notifications\CustomVerifyEmail;
 
-
-class User extends Authenticatable implements MustVerifyEmail
+class User extends Authenticatable implements MustVerifyEmail, JWTSubject
 {
-    /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable, HasApiTokens;
+    use HasFactory, Notifiable;
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var list<string>
-     */
     protected $fillable = [
         'name',
         'email',
@@ -27,6 +20,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'phone',
         'address',
         'role',
+        'avatar',
     ];
 
     protected $attributes = [
@@ -36,29 +30,21 @@ class User extends Authenticatable implements MustVerifyEmail
     public const ROLE_ADMIN = 1;
     public const ROLE_CUSTOMER = 2;
 
-    public  function isAdmin()
+    public function isAdmin()
     {
         return $this->role === self::ROLE_ADMIN;
     }
-    public  function isCustomer()
+
+    public function isCustomer()
     {
         return $this->role === self::ROLE_CUSTOMER;
     }
-    /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var list<string>
-     */
+
     protected $hidden = [
         'password',
         'remember_token',
     ];
 
-    /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
-     */
     protected function casts(): array
     {
         return [
@@ -67,10 +53,19 @@ class User extends Authenticatable implements MustVerifyEmail
         ];
     }
 
-
     public function sendEmailVerificationNotification()
     {
         $this->notify(new CustomVerifyEmail());
     }
 
+    // ✅ Thêm hai method bắt buộc để dùng JWT
+    public function getJWTIdentifier()
+    {
+        return $this->getKey();
+    }
+
+    public function getJWTCustomClaims(): array
+    {
+        return [];
+    }
 }

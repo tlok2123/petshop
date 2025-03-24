@@ -13,6 +13,12 @@
                 <a href="{{ route('admin.category.index') }}" class="btn btn-secondary mt-3">
                     <i class="bi bi-tags"></i> Danh sách danh mục
                 </a>
+                <a href="{{ route('admin.users.index') }}" class="btn btn-success mt-3">
+                    <i class="bi bi-people"></i> Quản lý người dùng
+                </a>
+                <a href="{{ route('admin.pet.index') }}" class="btn btn-warning mt-3">
+                    <i class="bi bi-heart"></i> Quản lý thú cưng
+                </a>
             </div>
         </div>
     </div>

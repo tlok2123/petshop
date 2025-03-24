@@ -1,39 +1,68 @@
 <?php
 
-use App\Http\Controllers\AuthController;
-use App\Http\Controllers\ProductController;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\AuthController;
+use App\Http\Controllers\PetController;
+use App\Http\Controllers\ProductController;
 use App\Http\Controllers\VerifyEmailController;
-
-Route::middleware('auth:sanctum')->group(function () {
-    Route::get('/user', function (Request $request) {
-        return response()->json([
-            'status' => 200,
-            'message' => 'User fetched successfully',
-            'data' => $request->user()
-        ], 200);
-    });
-
-    Route::post('/logout', [AuthController::class, 'logout']);
-});
+use Firebase\JWT\JWT;
+use Firebase\JWT\Key;
+use App\Models\User;
+use Illuminate\Support\Facades\Route;
 
 // 🔹 Đăng ký & đăng nhập
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login'])->name('login');
 
-// 🔹 Xác thực email
-Route::get('/email/verify', function () {
-    return response()->json([
-        'status' => 200,
-        'message' => 'Please verify your email'
-    ], 200);
-})->middleware('auth:sanctum')->name('verification.notice');
+// 🔹 Xác thực email bằng JWT
+Route::get('/email/verify/{id}/{token}', function ($id, $token) {
+    try {
+        $decoded = JWT::decode($token, new Key(env('JWT_SECRET'), 'HS256'));
 
-Route::get('/email/verify/{id}/{hash}', [VerifyEmailController::class, '__invoke'])
-    ->middleware(['signed', 'throttle:6,1'])
-    ->name('verification.verify');
+        if ($decoded->id != $id) {
+            return response()->json(['message' => 'Token không hợp lệ'], 400);
+        }
 
+        $user = User::findOrFail($id);
+
+        if ($user->hasVerifiedEmail()) {
+            return response()->json(['message' => 'Email đã được xác minh trước đó'], 200);
+        }
+
+        $user->markEmailAsVerified();
+
+        return response()->json(['message' => 'Xác minh email thành công']);
+    } catch (\Exception $e) {
+        return response()->json(['message' => 'Token không hợp lệ hoặc đã hết hạn'], 400);
+    }
+})->middleware('throttle:6,1')->name('verification.verify');
+
+// 🔹 Xác thực email bằng JWT (token từ query params)
+Route::get('/verify-email', function (Request $request) {
+    $token = $request->query('token');
+
+    if (!$token) {
+        return response()->json(['message' => 'Token không hợp lệ'], 400);
+    }
+
+    try {
+        $decoded = JWT::decode($token, new Key(env('JWT_SECRET'), 'HS256'));
+
+        $user = User::findOrFail($decoded->id);
+
+        if ($user->hasVerifiedEmail()) {
+            return response()->json(['message' => 'Email đã được xác minh trước đó'], 200);
+        }
+
+        $user->markEmailAsVerified();
+
+        return response()->json(['message' => 'Xác minh email thành công']);
+    } catch (\Exception $e) {
+        return response()->json(['message' => 'Token không hợp lệ hoặc đã hết hạn'], 400);
+    }
+})->middleware('throttle:6,1')->name('verification.verify.query');
+
+// 🔹 Gửi lại email xác minh
 Route::post('/email/verify/resend', function (Request $request) {
     if (!$request->user()) {
         return response()->json([
@@ -46,8 +75,28 @@ Route::post('/email/verify/resend', function (Request $request) {
     return response()->json([
         'message' => 'Verification link sent!'
     ], 200);
-})->middleware(['auth:sanctum', 'throttle:6,1'])->name('verification.send');
+})->middleware(['auth:api', 'throttle:6,1'])->name('verification.send');
 
-// 🔹 Lấy danh sách sản phẩm
+// 🔹 API yêu cầu đăng nhập
+Route::middleware('auth:api')->group(function () {
+    Route::get('/user', function (Request $request) {
+        return response()->json([
+            'status' => 200,
+            'message' => 'User fetched successfully',
+            'data' => $request->user()
+        ], 200);
+    });
+
+    Route::post('/logout', [AuthController::class, 'logout']);
+
+    // 🔹 Quản lý Pet
+    Route::post('/pets', [PetController::class, 'store']);
+    Route::get('/pets', [PetController::class, 'index']);
+    Route::get('/pets/{pet}', [PetController::class, 'show']);
+    Route::put('/pets/{pet}', [PetController::class, 'update']);
+    Route::delete('/pets/{pet}', [PetController::class, 'destroy']);
+});
+
+// 🔹 Lấy danh sách sản phẩm (Không yêu cầu đăng nhập)
 Route::get('/products', [ProductController::class, 'index']);
 Route::get('/products/{product}', [ProductController::class, 'show']);

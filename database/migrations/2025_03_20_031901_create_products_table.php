@@ -18,7 +18,7 @@ return new class extends Migration
             $table->unsignedInteger('price');
             $table->unsignedInteger('stock');
             $table->foreignId('category_id')->constrained();
-            $table->string('image_url');
+            $table->string('photo')->nullable();
             $table->timestamps();
         });
     }

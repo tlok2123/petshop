@@ -4,8 +4,8 @@ namespace App\Notifications;
 
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Auth\Notifications\VerifyEmail as BaseVerifyEmail;
-use Illuminate\Support\Facades\URL;
 use Carbon\Carbon;
+use Firebase\JWT\JWT;
 
 class CustomVerifyEmail extends BaseVerifyEmail
 {
@@ -22,10 +22,26 @@ class CustomVerifyEmail extends BaseVerifyEmail
 
     protected function verificationUrl($notifiable)
     {
-        return URL::signedRoute(
-            'verification.verify',
-            ['id' => $notifiable->id, 'hash' => sha1($notifiable->email)],
-            now()->addMinutes(60)
-        );
+        // Tạo JWT
+        $payload = [
+            'id' => $notifiable->id,
+            'email' => $notifiable->email,
+            'exp' => Carbon::now()->addMinutes(60)->timestamp, // Token hết hạn sau 60 phút
+        ];
+
+        $jwt = JWT::encode($payload, env('JWT_SECRET'), 'HS256');
+
+        // Lấy URL từ config
+        $frontendUrl = env('APP_USER_URL', 'http://localhost:8080');
+
+        // URL đúng chuẩn frontend cần: frontend-url/verify-email?token=JWT
+        $verificationUrl = "{$frontendUrl}/verify-email?token={$jwt}";
+
+        // Ghi log để debug
+        \Log::info("Verification URL: " . $verificationUrl);
+
+        return $verificationUrl;
     }
+
+
 }

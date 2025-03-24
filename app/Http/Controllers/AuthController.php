@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Auth\Events\Registered;
+use Tymon\JWTAuth\Facades\JWTAuth;
 
 class AuthController extends Controller
 {
@@ -30,25 +31,29 @@ class AuthController extends Controller
             'role' => User::ROLE_CUSTOMER,
         ]);
 
-        event(new Registered($user));
-        $token = $user->createToken('auth_token')->plainTextToken;
-        Auth::login($user);
+        event(new Registered($user)); // Gửi email xác thực
+
+        // Tạo JWT Token
+        $token = JWTAuth::fromUser($user);
 
         return response()->json([
             'status' => 201,
             'message' => 'Đăng ký thành công, kiểm tra email để xác thực tài khoản',
             'token' => $token,
+            'user' => $user,
         ], 201);
     }
 
-    public function login(Request $request)
+    public function login(Request $request): JsonResponse
     {
         $request->validate([
             'email' => 'required|string|email',
             'password' => 'required|string|min:8',
         ]);
 
-        if (!Auth::attempt($request->only('email', 'password'))) {
+        // Kiểm tra thông tin đăng nhập
+        $credentials = $request->only('email', 'password');
+        if (!$token = JWTAuth::attempt($credentials)) {
             return response()->json([
                 'status' => 401,
                 'message' => 'Sai thông tin đăng nhập'
@@ -57,34 +62,35 @@ class AuthController extends Controller
 
         $user = Auth::user();
 
+        // Kiểm tra xác thực email
         if (!$user->hasVerifiedEmail()) {
-            $token = $user->createToken('authToken')->plainTextToken;
-
             return response()->json([
                 'status' => 403,
-                'message' => 'Email chưa được xác thực',
-                'token' => $token,
+                'message' => 'Email chưa được xác thực. Vui lòng kiểm tra email của bạn.'
             ], 403);
         }
-
-        $user->tokens()->delete();
-
-        $token = $user->createToken('authToken')->plainTextToken;
 
         return response()->json([
             'status' => 200,
             'message' => 'Đăng nhập thành công',
             'token' => $token,
-//            'user' => $user,
+            'user' => $user
         ], 200);
     }
 
-    public function logout(Request $request)
+    public function logout(Request $request): JsonResponse
     {
-        $request->user()->currentAccessToken()->delete();
-        return response()->json([
-            'status' => 200,
-            'message' => 'Đăng xuất thành công'
-        ], 200);
+        try {
+            JWTAuth::invalidate(JWTAuth::getToken()); // Hủy token hiện tại
+            return response()->json([
+                'status' => 200,
+                'message' => 'Đăng xuất thành công'
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 500,
+                'message' => 'Lỗi khi đăng xuất, vui lòng thử lại'
+            ], 500);
+        }
     }
 }

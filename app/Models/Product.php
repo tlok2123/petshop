@@ -12,8 +12,13 @@ class Product extends Model
         'price',
         'stock',
         'category_id',
-        'image_url',
+        'photo',
     ];
+
+    public function getPhotoUrlAttribute()
+    {
+        return $this->photo ? asset('storage/photos/' . $this->photo) : asset('images/default.jpg');
+    }
 
     public function category()
     {

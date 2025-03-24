@@ -38,14 +38,14 @@ return [
     'guards' => [
         'web' => [
             'driver' => 'session',
+            'provider' => 'users', // Giữ nguyên provider cho web
+        ],
+        'api' => [
+            'driver' => env('AUTH_API_DRIVER', 'jwt'), // Cho phép thay đổi driver qua .env, mặc định là jwt
             'provider' => 'users',
         ],
-         'api' => [
-             'driver' => 'token',
-             'provider' => 'users',
-             'hash' => false,
-         ]
     ],
+
 
     /*
     |--------------------------------------------------------------------------
@@ -67,7 +67,7 @@ return [
     'providers' => [
         'users' => [
             'driver' => 'eloquent',
-            'model' => env('AUTH_MODEL', App\Models\User::class),
+            'model' => App\Models\User::class,
         ],
 
         // 'users' => [
