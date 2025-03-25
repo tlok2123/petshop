@@ -13,8 +13,8 @@ return new class extends Migration
     {
         Schema::create('orders', function (Blueprint $table) {
             $table->id();
-            $table->unsignedInteger('user_id');
-            $table->unsignedInteger('total_price');
+            $table->foreignId('user_id')->constrained()->onDelete('cascade');
+            $table->unsignedBigInteger('total_price');
             $table->unsignedSmallInteger('status')->comment('1: Đang xử lí; 2: Hoàn thành; 3: Đã hủy');
             $table->timestamps();
         });

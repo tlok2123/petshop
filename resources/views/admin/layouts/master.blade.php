@@ -71,6 +71,9 @@
     <a href="{{ route('admin.pets.index') }}" class="{{ request()->routeIs('admin.pets.index') ? 'active' : '' }}">
         <i class="bi bi-heart"></i> Thú cưng
     </a>
+    <a href="{{ route('admin.orders.index') }}" class="{{ request()->routeIs('admin.orders.index') ? 'active' : '' }}">
+        <i class="bi bi-box-seam"></i> Đơn hàng
+    </a>
 </div>
 
 <!-- Nội dung chính -->

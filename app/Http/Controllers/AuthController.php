@@ -16,11 +16,18 @@ class AuthController extends Controller
     {
         $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'required|email|string|max:255|unique:users',
+            'email' => 'required|email|string|max:255',
             'password' => 'required|string|min:8',
             'phone' => 'required|string|min:10|max:10',
             'address' => 'required|string|max:255',
         ]);
+
+        if (User::where('email', $request->email)->exists()) {
+            return response()->json([
+                'status' => 409,
+                'message' => 'Email đã tồn tại',
+            ], 409);
+        }
 
         $user = User::create([
             'name' => $request->name,

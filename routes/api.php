@@ -66,14 +66,16 @@ Route::get('/verify-email', function (Request $request) {
 Route::post('/email/verify/resend', function (Request $request) {
     if (!$request->user()) {
         return response()->json([
-            'message' => 'Unauthorized'
+            'status' => '401',
+            'message' => 'Vui lòng đăng nhập để tiếp tục'
         ], 401);
     }
 
     $request->user()->sendEmailVerificationNotification();
 
     return response()->json([
-        'message' => 'Verification link sent!'
+        'status' => '200',
+        'message' => 'Mail đã được gửi lại'
     ], 200);
 })->middleware(['auth:api', 'throttle:6,1'])->name('verification.send');
 
@@ -82,7 +84,7 @@ Route::middleware('auth:api')->group(function () {
     Route::get('/user', function (Request $request) {
         return response()->json([
             'status' => 200,
-            'message' => 'User fetched successfully',
+            'message' => 'Đăng nhập thành công',
             'data' => $request->user()
         ], 200);
     });
