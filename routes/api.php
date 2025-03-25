@@ -9,6 +9,7 @@ use Firebase\JWT\JWT;
 use Firebase\JWT\Key;
 use App\Models\User;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\CategoryController;
 
 // 🔹 Đăng ký & đăng nhập
 Route::post('/register', [AuthController::class, 'register']);
@@ -102,3 +103,6 @@ Route::middleware('auth:api')->group(function () {
 // 🔹 Lấy danh sách sản phẩm (Không yêu cầu đăng nhập)
 Route::get('/products', [ProductController::class, 'index']);
 Route::get('/products/{product}', [ProductController::class, 'show']);
+Route::get('/categories', [CategoryController::class, 'index']);
+Route::get('/categories/{category_id}/products', [ProductController::class, 'getByCategory']);
+
