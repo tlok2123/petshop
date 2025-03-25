@@ -53,7 +53,8 @@ return [
     */
 
     'url' => env('APP_URL', 'http://localhost'),
-    'frontend_url' => env('USER_URL', 'http://192.168.0.207:8080'),
+    'frontend_url' => env('APP_USER_URL', 'http://localhost:8080'),
+
 
     /*
     |--------------------------------------------------------------------------
