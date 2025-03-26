@@ -77,6 +77,9 @@
     <a href="{{ route('admin.services.index') }}" class="{{ request()->routeIs('admin.services.index') ? 'active' : '' }}">
         <i class="bi bi-wrench"></i> Dịch vụ
     </a>
+    <a href="{{ route('admin.appointments.index') }}" class="{{ request()->routeIs('admin.appointments.index') ? 'active' : '' }}">
+        <i class="bi bi-calendar"></i> Hẹn dịch vụ
+    </a>
 </div>
 
 <!-- Nội dung chính -->

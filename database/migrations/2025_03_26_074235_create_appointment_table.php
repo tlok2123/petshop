@@ -13,12 +13,12 @@ return new class extends Migration
     {
         Schema::create('appointments', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->constrained('users');
-            $table->foreignId('pet_id')->constrained('pets');
-            $table->foreignId('services_id')->constrained('services');
+            $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
+            $table->foreignId('pet_id')->constrained('pets')->onDelete('cascade');
             $table->dateTime('date');
-            $table->unsignedSmallInteger('status')->comment('1: Đang xử lý; 2: Đã liên hệ; 3: Đã xác nhận; 4: Đã hoàn thành');
-            $table->text('note');
+            $table->unsignedSmallInteger('status')->default(1)->comment('1: Đang xử lý; 2: Đã liên hệ; 3: Đã xác nhận; 4: Đã hoàn thành');
+            $table->text('note')->nullable();
+            $table->decimal('total_price', 10, 2)->default(0); // Tổng tiền đơn dịch vụ
             $table->timestamps();
         });
     }

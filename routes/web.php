@@ -5,6 +5,7 @@ use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\PetController;
+use App\Http\Controllers\Admin\AppointmentController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Admin\OrderController;
 use App\Http\Controllers\DashboardController;
@@ -23,6 +24,8 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::resource('orders', OrderController::class);
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
+    Route::get('get-pets-by-user/{user_id}', [AppointmentController::class, 'getPets']);
+    Route::resource('appointments', AppointmentController::class);
     Route::resource('services', ServicesController::class);
     Route::resource('users', UserController::class);
     Route::resource('category', CategoryController::class);
