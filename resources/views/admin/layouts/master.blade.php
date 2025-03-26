@@ -74,6 +74,9 @@
     <a href="{{ route('admin.orders.index') }}" class="{{ request()->routeIs('admin.orders.index') ? 'active' : '' }}">
         <i class="bi bi-box-seam"></i> Đơn hàng
     </a>
+    <a href="{{ route('admin.services.index') }}" class="{{ request()->routeIs('admin.services.index') ? 'active' : '' }}">
+        <i class="bi bi-wrench"></i> Dịch vụ
+    </a>
 </div>
 
 <!-- Nội dung chính -->

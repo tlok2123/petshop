@@ -8,6 +8,7 @@ use App\Http\Controllers\Admin\PetController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Admin\OrderController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\Admin\ServicesController;
 Route::get('/', function () {
     return view('welcome');
 });
@@ -22,7 +23,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::resource('orders', OrderController::class);
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
-
+    Route::resource('services', ServicesController::class);
     Route::resource('users', UserController::class);
     Route::resource('category', CategoryController::class);
     Route::resource('pets', PetController::class);

@@ -10,6 +10,7 @@ use Firebase\JWT\Key;
 use App\Models\User;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\ServicesController;
 
 // 🔹 Đăng ký & đăng nhập
 Route::post('/register', [AuthController::class, 'register']);
@@ -89,7 +90,6 @@ Route::middleware('auth:api')->group(function () {
             'data' => $request->user()
         ], 200);
     });
-
     Route::post('/logout', [AuthController::class, 'logout']);
 
     // 🔹 Quản lý Pet
@@ -105,4 +105,6 @@ Route::get('/products', [ProductController::class, 'index']);
 Route::get('/products/{product}', [ProductController::class, 'show']);
 Route::get('/categories', [CategoryController::class, 'index']);
 Route::get('/categories/{category_id}/products', [ProductController::class, 'getByCategory']);
+Route::get('services', [ServicesController::class, 'index']);
+Route::get('services/{id}', [ServicesController::class, 'show']);
 
