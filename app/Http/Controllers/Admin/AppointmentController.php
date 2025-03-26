@@ -18,7 +18,7 @@ class AppointmentController extends Controller
      */
     public function index()
     {
-        $appointments = Appointment::latest()->paginate(10);
+        $appointments = Appointment::orderBy('id', 'asc')->paginate(10);
         return view('admin.appointments.index', compact('appointments'));
     }
 
@@ -65,7 +65,13 @@ class AppointmentController extends Controller
         foreach ($request->services as $service_id) {
             $service = Service::find($service_id);
             if ($service) {
-                $appointment->services()->create($service->id, ['price' => $service->price]);
+                // Create the association in the pivot table or `appointment_services`
+                $appointment->services()->create([
+                    'service_id' => $service->id, // Correctly reference the service_id
+                    'price' => $service->price
+                ]);
+
+                // Calculate the total price
                 $totalPrice += $service->price;
             }
         }
@@ -75,6 +81,7 @@ class AppointmentController extends Controller
 
         return redirect()->route('admin.appointments.index')->with('success', 'Cuộc hẹn đã được tạo.');
     }
+
 
     /**
      * Hiển thị chi tiết một cuộc hẹn.
@@ -149,7 +156,7 @@ class AppointmentController extends Controller
      */
     public function destroy(Appointment $appointment)
     {
-        $appointment->services()->detach();
+        $appointment->services()->delete();
         $appointment->delete();
         return redirect()->route('admin.appointments.index')->with('success', 'Cuộc hẹn đã bị xóa.');
     }

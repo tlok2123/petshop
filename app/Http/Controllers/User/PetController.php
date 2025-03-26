@@ -1,10 +1,11 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\User;
 
+use App\Http\Controllers\Controller;
 use App\Models\Pet;
-use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class PetController extends Controller
@@ -46,7 +47,7 @@ class PetController extends Controller
         if ($pet->user_id !== Auth::id()) {
             return response()->json([
                 'status' => 403,
-                'message' => 'Unauthorized'], 403);
+                'message' => 'Không tìm thấy người dùng'], 403);
         }
         return response()->json([
             'status' => 200,
@@ -62,7 +63,7 @@ class PetController extends Controller
         if ($pet->user_id !== Auth::id()) {
             return response()->json([
                 'status' => 403,
-                'message' => 'Unauthorized'], 403);
+                'message' => 'Không tìm thấy người dùng'], 403);
         }
 
         $validated = $request->validate([
@@ -88,12 +89,12 @@ class PetController extends Controller
         if ($pet->user_id !== Auth::id()) {
             return response()->json([
                 'status' => 403,
-                'message' => 'Unauthorized'], 403);
+                'message' => 'Không tìm thấy người dùng'], 403);
         }
 
         $pet->delete();
         return response()->json([
             'status' => 200,
-            'message' => 'Pet deleted successfully']);
+            'message' => 'Xóa thú cưng thành công']);
     }
 }

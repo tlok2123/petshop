@@ -1,16 +1,15 @@
 <?php
 
-use Illuminate\Http\Request;
-use App\Http\Controllers\AuthController;
-use App\Http\Controllers\PetController;
-use App\Http\Controllers\ProductController;
-use App\Http\Controllers\VerifyEmailController;
+use App\Http\Controllers\Auth\AuthController;
+use App\Http\Controllers\User\CategoryController;
+use App\Http\Controllers\User\PetController;
+use App\Http\Controllers\User\ProductController;
+use App\Http\Controllers\User\ServicesController;
+use App\Models\User;
 use Firebase\JWT\JWT;
 use Firebase\JWT\Key;
-use App\Models\User;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\CategoryController;
-use App\Http\Controllers\ServicesController;
 
 // 🔹 Đăng ký & đăng nhập
 Route::post('/register', [AuthController::class, 'register']);
