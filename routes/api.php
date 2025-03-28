@@ -5,13 +5,12 @@ use App\Http\Controllers\User\CategoryController;
 use App\Http\Controllers\User\PetController;
 use App\Http\Controllers\User\ProductController;
 use App\Http\Controllers\User\ServicesController;
+use App\Http\Controllers\User\UserController;
 use App\Models\User;
 use Firebase\JWT\JWT;
 use Firebase\JWT\Key;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\VNPayController;
-use App\Http\Controllers\User\OrderController;
 
 // 🔹 Đăng ký & đăng nhập
 Route::post('/register', [AuthController::class, 'register']);
@@ -94,11 +93,11 @@ Route::middleware('auth:api')->group(function () {
         return response()->json([
             'status' => 200,
             'message' => 'Đăng nhập thành công',
-            'data' => $request->user()
         ], 200);
     });
     Route::post('/logout', [AuthController::class, 'logout']);
-
+    Route::get('/user/profile', [UserController::class, 'getProfile']);
+    Route::post('/user/profile', [UserController::class, 'updateProfile']);
     // 🔹 Quản lý Pet
     Route::post('/pets', [PetController::class, 'store']);
     Route::get('/pets', [PetController::class, 'index']);
@@ -106,10 +105,7 @@ Route::middleware('auth:api')->group(function () {
     Route::put('/pets/{pet}', [PetController::class, 'update']);
     Route::delete('/pets/{pet}', [PetController::class, 'destroy']);
 
-    Route::Resource('orders', OrderController::class);
-    Route::post('/orders/{order}/cancel', [OrderController::class, 'cancel']); // Hủy đơn hàng
-    Route::post('/orders/{order}/pay', [VNPayController::class, 'createPayment']); // Thanh toán đơn hàng đã có
-    Route::post('/orders/pay-new', [VNPayController::class, 'payNewOrder']); // Thanh toán đơn hàng chưa có
+
 
 });
 
@@ -121,5 +117,4 @@ Route::get('/categories/{category_id}/products', [ProductController::class, 'get
 Route::get('services', [ServicesController::class, 'index']);
 Route::get('services/{id}', [ServicesController::class, 'show']);
 
-Route::get('/vnpay/payment', [VNPayController::class, 'createPayment']);
-Route::get('/vnpay/return', [VNPayController::class, 'vnpayReturn']);
+
