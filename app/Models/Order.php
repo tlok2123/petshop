@@ -4,7 +4,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-
+use App\Models\User;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class Order extends Model
 {
     use HasFactory;
@@ -13,6 +14,8 @@ class Order extends Model
         'user_id',
         'total_price',
         'status',
+        'payment_method',
+        'payment_status',
     ];
 
     public function user()
@@ -26,7 +29,7 @@ class Order extends Model
     }
     public function updateTotalPrice()
     {
-        $this->total_price = $this->items()->sum(\DB::raw('quantity * price'));
+        $this->total_price = $this->items()->sum('price'); // Chỉ lấy tổng cột price
         $this->save();
     }
 

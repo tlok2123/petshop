@@ -10,6 +10,8 @@ use Firebase\JWT\JWT;
 use Firebase\JWT\Key;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\VNPayController;
+use App\Http\Controllers\User\OrderController;
 
 // 🔹 Đăng ký & đăng nhập
 Route::post('/register', [AuthController::class, 'register']);
@@ -52,14 +54,20 @@ Route::get('/verify-email', function (Request $request) {
         $user = User::findOrFail($decoded->id);
 
         if ($user->hasVerifiedEmail()) {
-            return response()->json(['message' => 'Email đã được xác minh trước đó'], 200);
+            return response()->json([
+                'status' => 200,
+                'message' => 'Email đã được xác minh trước đó'], 200);
         }
 
         $user->markEmailAsVerified();
 
-        return response()->json(['message' => 'Xác minh email thành công']);
+        return response()->json([
+            'status' => 200,
+            'message' => 'Xác minh email thành công']);
     } catch (\Exception $e) {
-        return response()->json(['message' => 'Token không hợp lệ hoặc đã hết hạn'], 400);
+        return response()->json([
+            'status' => 400,
+            'message' => 'Token không hợp lệ hoặc đã hết hạn'], 400);
     }
 })->middleware('throttle:6,1')->name('verification.verify.query');
 
@@ -67,7 +75,7 @@ Route::get('/verify-email', function (Request $request) {
 Route::post('/email/verify/resend', function (Request $request) {
     if (!$request->user()) {
         return response()->json([
-            'status' => '401',
+            'status' => 401,
             'message' => 'Vui lòng đăng nhập để tiếp tục'
         ], 401);
     }
@@ -75,7 +83,7 @@ Route::post('/email/verify/resend', function (Request $request) {
     $request->user()->sendEmailVerificationNotification();
 
     return response()->json([
-        'status' => '200',
+        'status' => 200,
         'message' => 'Mail đã được gửi lại'
     ], 200);
 })->middleware(['auth:api', 'throttle:6,1'])->name('verification.send');
@@ -97,6 +105,12 @@ Route::middleware('auth:api')->group(function () {
     Route::get('/pets/{pet}', [PetController::class, 'show']);
     Route::put('/pets/{pet}', [PetController::class, 'update']);
     Route::delete('/pets/{pet}', [PetController::class, 'destroy']);
+
+    Route::Resource('orders', OrderController::class);
+    Route::post('/orders/{order}/cancel', [OrderController::class, 'cancel']); // Hủy đơn hàng
+    Route::post('/orders/{order}/pay', [VNPayController::class, 'createPayment']); // Thanh toán đơn hàng đã có
+    Route::post('/orders/pay-new', [VNPayController::class, 'payNewOrder']); // Thanh toán đơn hàng chưa có
+
 });
 
 // 🔹 Lấy danh sách sản phẩm (Không yêu cầu đăng nhập)
@@ -107,3 +121,5 @@ Route::get('/categories/{category_id}/products', [ProductController::class, 'get
 Route::get('services', [ServicesController::class, 'index']);
 Route::get('services/{id}', [ServicesController::class, 'show']);
 
+Route::get('/vnpay/payment', [VNPayController::class, 'createPayment']);
+Route::get('/vnpay/return', [VNPayController::class, 'vnpayReturn']);

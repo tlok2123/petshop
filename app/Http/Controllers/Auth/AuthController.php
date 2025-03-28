@@ -23,6 +23,7 @@ class AuthController extends Controller
             'address' => 'required|string|max:255',
         ]);
 
+        // Kiểm tra nếu email đã tồn tại
         if (User::where('email', $request->email)->exists()) {
             return response()->json([
                 'status' => 409,
@@ -30,6 +31,7 @@ class AuthController extends Controller
             ], 409);
         }
 
+        // Tạo người dùng mới
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
@@ -39,6 +41,7 @@ class AuthController extends Controller
             'role' => User::ROLE_CUSTOMER,
         ]);
 
+        // Gửi email xác thực
         event(new Registered($user)); // Gửi email xác thực
 
         // Tạo JWT Token
@@ -70,11 +73,12 @@ class AuthController extends Controller
 
         $user = Auth::user();
 
-        // Kiểm tra xác thực email
+        // Trả về token bất kể xác thực email hay chưa
         if (!$user->hasVerifiedEmail()) {
             return response()->json([
+                'token' => $token, // Trả về token cho dù email chưa xác thực
                 'status' => 403,
-                'message' => 'Email chưa được xác thực. Vui lòng kiểm tra email của bạn.'
+                'message' => 'Email chưa được xác thực. Vui lòng kiểm tra email của bạn để xác thực.'
             ], 403);
         }
 

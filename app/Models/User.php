@@ -8,6 +8,8 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Tymon\JWTAuth\Contracts\JWTSubject; // ✅ Import JWTSubject
 use App\Notifications\CustomVerifyEmail;
+use App\Models\Order;
+
 
 class User extends Authenticatable implements MustVerifyEmail, JWTSubject
 {
@@ -67,5 +69,9 @@ class User extends Authenticatable implements MustVerifyEmail, JWTSubject
     public function getJWTCustomClaims(): array
     {
         return [];
+    }
+    public function orders()
+    {
+        return $this->hasMany(Order::class);
     }
 }
