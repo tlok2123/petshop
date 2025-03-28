@@ -11,7 +11,7 @@ use Firebase\JWT\JWT;
 use Firebase\JWT\Key;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-
+use App\Http\Controllers\OrderController;
 // 🔹 Đăng ký & đăng nhập
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login'])->name('login');
@@ -98,6 +98,14 @@ Route::middleware('auth:api')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/user/profile', [UserController::class, 'getProfile']);
     Route::post('/user/profile', [UserController::class, 'updateProfile']);
+
+    //Quản lí đơn hàng
+    Route::get('/orders', [OrderController::class, 'index'])->name('orders.index'); // Danh sách đơn hàng của người dùng
+    Route::post('/orders', [OrderController::class, 'store'])->name('orders.store'); // Tạo đơn hàng mới
+    Route::get('/orders/{order}', [OrderController::class, 'show'])->name('orders.show'); // Xem chi tiết đơn hàng
+    Route::put('/orders/{order}', [OrderController::class, 'update'])->name('orders.update'); // Cập nhật trạng thái đơn hàng
+    Route::delete('/orders/{order}', [OrderController::class, 'destroy'])->name('orders.destroy'); // Hủy đơn hàng
+
     // 🔹 Quản lý Pet
     Route::post('/pets', [PetController::class, 'store']);
     Route::get('/pets', [PetController::class, 'index']);
