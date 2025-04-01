@@ -13,13 +13,13 @@ use App\Http\Controllers\VNPayController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
-// 🔹 Authentication Routes (Không yêu cầu đăng nhập)
+
 Route::prefix('auth')->group(function () {
     Route::post('/register', [AuthController::class, 'register'])->name('auth.register');
     Route::post('/login', [AuthController::class, 'login'])->name('auth.login');
 });
 
-// 🔹 Email Verification Routes
+
 Route::prefix('email')->middleware('throttle:6,1')->group(function () {
     Route::get('/verify/{id}/{token}', [EmailVerificationController::class, 'verify'])->name('verification.verify');
     Route::get('/verify', [EmailVerificationController::class, 'verifyByQuery'])->name('verification.verify.query');

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\User;
 
+use App\Helpers\Helper;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\User\StoreOrderRequest;
 use App\Http\Requests\User\UpdateOrderRequest;
@@ -21,11 +22,7 @@ class OrderController extends Controller
             ->orderBy('id', 'desc')
             ->paginate(10);
 
-        return response()->json([
-            'status' => 200,
-            'message' => 'Lấy danh sách đơn hàng thành công',
-            'orders' => $orders
-        ], 200);
+        return Helper::apiResponse(200, 'Lấy danh sách đơn hàng thành công', ['orders' => $orders]);
     }
 
     public function store(StoreOrderRequest $request)
@@ -50,45 +47,28 @@ class OrderController extends Controller
 
         $order->updateTotalPrice();
 
-        return response()->json([
-            'status' => 201,
-            'message' => 'Đơn hàng đã được tạo.',
-            'order' => $order
-        ], 201);
+        return Helper::apiResponse(201, 'Đơn hàng đã được tạo.', ['order' => $order]);
     }
 
     public function show(Order $order)
     {
         if ($order->user_id !== Auth::id()) {
-            return response()->json([
-                'status' => 403,
-                'message' => 'Bạn không có quyền truy cập đơn hàng này.'
-            ], 403);
+            return Helper::apiResponse(403, 'Bạn không có quyền truy cập đơn hàng này.');
         }
 
         $order->load('items.product');
 
-        return response()->json([
-            'status' => 200,
-            'message' => 'Lấy thông tin đơn hàng thành công',
-            'order' => $order
-        ], 200);
+        return Helper::apiResponse(200, 'Lấy thông tin đơn hàng thành công', ['order' => $order]);
     }
 
     public function update(UpdateOrderRequest $request, Order $order)
     {
         if ($order->user_id !== Auth::id()) {
-            return response()->json([
-                'status' => 403,
-                'message' => 'Bạn không có quyền chỉnh sửa đơn hàng này.'
-            ], 403);
+            return Helper::apiResponse(403, 'Bạn không có quyền chỉnh sửa đơn hàng này.');
         }
 
         if ($order->status != 1) {
-            return response()->json([
-                'status' => 400,
-                'message' => 'Không thể chỉnh sửa đơn hàng đã xử lý.'
-            ], 400);
+            return Helper::apiResponse(400, 'Không thể chỉnh sửa đơn hàng đã xử lý.');
         }
 
         $data = $request->validated();
@@ -104,28 +84,18 @@ class OrderController extends Controller
 
         $order->updateTotalPrice();
 
-        return response()->json([
-            'status' => 200,
-            'message' => 'Đơn hàng đã được cập nhật.',
-            'order' => $order
-        ], 200);
+        return Helper::apiResponse(200, 'Đơn hàng đã được cập nhật.', ['order' => $order]);
     }
 
     public function destroy(Order $order)
     {
         if ($order->user_id !== Auth::id()) {
-            return response()->json([
-                'status' => 403,
-                'message' => 'Bạn không có quyền hủy đơn hàng này.'
-            ], 403);
+            return Helper::apiResponse(403, 'Bạn không có quyền hủy đơn hàng này.');
         }
 
         $order->delete();
 
-        return response()->json([
-            'status' => 200,
-            'message' => 'Đơn hàng đã được hủy.'
-        ], 200);
+        return Helper::apiResponse(200, 'Đơn hàng đã được hủy.');
     }
 
     public function updateStatus(UpdateOrderStatusRequest $request)
@@ -134,10 +104,7 @@ class OrderController extends Controller
         $order = Order::find($data['order_id']);
 
         if (!$order) {
-            return response()->json([
-                'status' => 404,
-                'message' => 'Không tìm thấy đơn hàng!',
-            ], 404);
+            return Helper::apiResponse(404, 'Không tìm thấy đơn hàng!');
         }
 
         if ($data['transaction_status'] === '00') {
@@ -150,22 +117,12 @@ class OrderController extends Controller
                     'new_status' => 2
                 ]);
 
-                return response()->json([
-                    'status' => 200,
-                    'message' => 'Cập nhật trạng thái đơn hàng thành công!',
-                    'data' => $order,
-                ], 200);
+                return Helper::apiResponse(200, 'Cập nhật trạng thái đơn hàng thành công!', ['data' => $order]);
             } else {
-                return response()->json([
-                    'status' => 400,
-                    'message' => 'Đơn hàng không ở trạng thái chờ xử lý!',
-                ], 400);
+                return Helper::apiResponse(400, 'Đơn hàng không ở trạng thái chờ xử lý!');
             }
         }
 
-        return response()->json([
-            'status' => 400,
-            'message' => 'Giao dịch không thành công!',
-        ], 400);
+        return Helper::apiResponse(400, 'Giao dịch không thành công!');
     }
 }
