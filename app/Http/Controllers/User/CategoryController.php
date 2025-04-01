@@ -5,6 +5,7 @@ namespace App\Http\Controllers\User;
 use App\Http\Controllers\Controller;
 use App\Models\Category;
 use Exception;
+use App\Helpers\Helper; // Import Helper
 
 class CategoryController extends Controller
 {
@@ -13,17 +14,9 @@ class CategoryController extends Controller
         try {
             $categories = Category::select('id', 'name', 'created_at', 'updated_at')->paginate(10);
 
-            return response()->json([
-                'status' => 200,
-                'message' => 'Lấy danh sách danh mục thành công',
-                'data' => $categories
-            ], 200);
+            return Helper::apiResponse(200, 'Lấy danh sách danh mục thành công', ['categories' => $categories]);
         } catch (Exception $e) {
-            return response()->json([
-                'status' => 500,
-                'message' => 'Lỗi lấy danh sách danh mục',
-                'error' => $e->getMessage()
-            ], 500);
+            return Helper::apiResponse(500, 'Lỗi lấy danh sách danh mục', ['error' => $e->getMessage()]);
         }
     }
 }

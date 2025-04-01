@@ -5,6 +5,7 @@ namespace App\Http\Controllers\User;
 use App\Http\Controllers\Controller;
 use App\Models\Service;
 use Illuminate\Http\Request;
+use App\Helpers\Helper;
 
 class ServicesController extends Controller
 {
@@ -15,11 +16,7 @@ class ServicesController extends Controller
             $query->where('name', 'like', '%' . $request->search . '%');
         }
         $services = $query->latest()->paginate(10);
-        return response()->json([
-            'status' => 200,
-            'message' => 'Danh sách dịch vụ',
-            'data' => $services
-        ]);
+        return Helper::apiResponse(200, 'Danh sách dịch vụ', ['services' => $services]);
     }
 
     public function show($id)
@@ -27,16 +24,9 @@ class ServicesController extends Controller
         $service = Service::find($id);
 
         if (!$service) {
-            return response()->json([
-                'status' => 404,
-                'message' => 'Không tìm thấy dịch vụ'
-            ], 404);
+            return Helper::apiResponse(404, 'Không tìm thấy dịch vụ');
         }
 
-        return response()->json([
-            'status' => 200,
-            'message' => 'Chi tiết dịch vụ',
-            'data' => $service
-        ]);
+        return Helper::apiResponse(200, 'Chi tiết dịch vụ', ['service' => $service]);
     }
 }

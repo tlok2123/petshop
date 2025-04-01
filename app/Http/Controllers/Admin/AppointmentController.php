@@ -9,12 +9,37 @@ use App\Models\Pet;
 use App\Models\Product;
 use App\Models\Service;
 use App\Models\User;
+use Illuminate\Http\Request;
 
 class AppointmentController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $appointments = Appointment::orderBy('id', 'asc')->paginate(10);
+        // Lấy các tham số tìm kiếm và lọc
+        $search = $request->query('search');
+        $status = $request->query('status');
+
+        // Query cơ bản
+        $query = Appointment::query();
+
+        // Tìm kiếm theo tên khách hàng hoặc tên thú cưng
+        if ($search) {
+            $query->whereHas('user', function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%");
+            })->orWhereHas('pet', function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%");
+            });
+        }
+
+        // Lọc theo trạng thái
+        if ($status) {
+            $query->where('status', $status);
+        }
+
+        // Phân trang (10 cuộc hẹn mỗi trang)
+        $appointments = $query->paginate(10);
+
+        // Truyền dữ liệu sang view
         return view('admin.appointments.index', compact('appointments'));
     }
 
@@ -29,8 +54,6 @@ class AppointmentController extends Controller
     public function store(AppointmentRequest $request)
     {
         $data = $request->validated();
-
-        // Create appointment
         $appointment = Appointment::create([
             'user_id' => $data['user_id'],
             'pet_id' => $data['pet_id'],
@@ -39,10 +62,7 @@ class AppointmentController extends Controller
             'note' => $data['note'],
             'total_price' => 0
         ]);
-
         $totalPrice = 0;
-
-        // Save services
         foreach ($data['services'] as $service_id) {
             $service = Service::find($service_id);
             if ($service) {

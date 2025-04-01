@@ -6,13 +6,19 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\ProductRequest;
 use App\Models\Category;
 use App\Models\Product;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
 class ProductController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $products = Product::with('category')->paginate(10);
+        $search = $request->query('search');
+        $query = Product::query();
+        if ($search) {
+            $query->where('name', 'like', "%{$search}%");
+        }
+        $products = $query->paginate(10);
         return view('admin.product.index', compact('products'));
     }
 
@@ -54,7 +60,6 @@ class ProductController extends Controller
     public function update(ProductRequest $request, Product $product)
     {
         $data = $request->validated();
-
         if ($request->hasFile('photo')) {
             if ($product->photo) {
                 Storage::disk('public')->delete($product->photo);
@@ -62,9 +67,7 @@ class ProductController extends Controller
             $photoName = time() . '.' . $request->file('photo')->extension();
             $data['photo'] = $request->file('photo')->storeAs('photos', `time() . '.' . $photoName`, 'public');
         }
-
         $product->update($data);
-
         return redirect()->route('admin.product.index')->with('success', 'Đã cập nhật sản phẩm');
     }
 

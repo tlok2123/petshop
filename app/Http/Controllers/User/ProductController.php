@@ -3,10 +3,11 @@
 namespace App\Http\Controllers\User;
 
 use App\Http\Controllers\Controller;
-use App\Http\Controllers\Exception;
 use App\Models\Product;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Exception;
+use App\Helpers\Helper;
 
 class ProductController extends Controller
 {
@@ -18,17 +19,9 @@ class ProductController extends Controller
                 $product->image_url = $product->photo ? asset('storage/' . $product->photo) : null;
                 return $product;
             });
-            return response()->json([
-                'status' => '200',
-                'message' => 'Lấy danh sách sản phẩm thành công',
-                'data' => $products
-            ], 200);
-        } catch (\Exception $e) {
-            return response()->json([
-                'status' => '500',
-                'message' => 'Không thể lấy danh sách sản phẩm',
-                'error' => $e->getMessage()
-            ], 500);
+            return Helper::apiResponse(200, 'Lấy danh sách sản phẩm thành công', ['products' => $products]);
+        } catch (Exception $e) {
+            return Helper::apiResponse(500, 'Không thể lấy danh sách sản phẩm', ['error' => $e->getMessage()]);
         }
     }
 
@@ -37,17 +30,9 @@ class ProductController extends Controller
         try {
             $product->load('category');
             $product->image_url = $product->photo ? asset('storage/' . $product->photo) : null;
-            return response()->json([
-                'status' => '200',
-                'message' => 'Lấy sản phẩm thành công',
-                'data' => $product
-            ], 200);
-        } catch (\Exception $e) {
-            return response()->json([
-                'status' => '500',
-                'message' => 'Không thể lấy thông tin sản phẩm',
-                'error' => $e->getMessage()
-            ], 500);
+            return Helper::apiResponse(200, 'Lấy sản phẩm thành công', ['product' => $product]);
+        } catch (Exception $e) {
+            return Helper::apiResponse(500, 'Không thể lấy thông tin sản phẩm', ['error' => $e->getMessage()]);
         }
     }
 
@@ -58,20 +43,12 @@ class ProductController extends Controller
                 ->select('id', 'name', 'description', 'price', 'stock', 'category_id', 'photo', 'created_at', 'updated_at')
                 ->paginate(10);
             $products->getCollection()->transform(function ($product) {
-                $product->image_url = $product->photo ? url('storage/' . $product->photo) : null;
+                $product->image_url = $product->photo ? asset('storage/' . $product->photo) : null;
                 return $product;
             });
-            return response()->json([
-                'status' => 200,
-                'message' => 'Lấy danh sách sản phẩm theo danh mục thành công',
-                'data' => $products
-            ], 200);
+            return Helper::apiResponse(200, 'Lấy danh sách sản phẩm theo danh mục thành công', ['products' => $products]);
         } catch (Exception $e) {
-            return response()->json([
-                'status' => 500,
-                'message' => 'Lỗi lấy danh sách sản phẩm',
-                'error' => $e->getMessage()
-            ], 500);
+            return Helper::apiResponse(500, 'Lỗi lấy danh sách sản phẩm', ['error' => $e->getMessage()]);
         }
     }
 }

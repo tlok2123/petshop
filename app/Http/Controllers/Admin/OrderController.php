@@ -7,12 +7,25 @@ use App\Http\Requests\Admin\OrderRequest;
 use App\Models\Order;
 use App\Models\Product;
 use App\Models\User;
+use Illuminate\Http\Request;
+
 
 class OrderController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $orders = Order::orderBy('id', 'asc')->paginate(10);
+        $search = $request->query('search');
+        $status = $request->query('status');
+        $query = Order::query();
+        if ($search) {
+            $query->whereHas('user', function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%");
+            });
+        }
+        if ($status !== null && $status !== '') {
+            $query->where('status', $status);
+        }
+        $orders = $query->paginate(10);
         return view('admin.orders.index', compact('orders'));
     }
 

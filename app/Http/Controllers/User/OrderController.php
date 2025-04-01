@@ -84,7 +84,6 @@ class OrderController extends Controller
             ], 403);
         }
 
-        // Chỉ cho phép chỉnh sửa nếu đơn hàng đang ở trạng thái chờ xử lý (status = 1)
         if ($order->status != 1) {
             return response()->json([
                 'status' => 400,
@@ -93,11 +92,7 @@ class OrderController extends Controller
         }
 
         $data = $request->validated();
-
-        // Xóa các items cũ
         $order->items()->delete();
-
-        // Thêm các items mới
         foreach ($data['products'] as $item) {
             $product = Product::find($item['id']);
             $order->items()->create([

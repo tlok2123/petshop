@@ -15,9 +15,9 @@ class Product extends Model
         'photo',
     ];
 
-    public function getPhotoUrlAttribute()
+    public function getPhotoAttribute($value)
     {
-        return $this->photo ? asset('storage/photos/' . $this->photo) : asset('images/default.jpg');
+        return $value ? asset('storage/' . $value) : asset('images/default.jpg');
     }
 
     public function category()

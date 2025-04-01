@@ -19,6 +19,7 @@ class PetRequest extends FormRequest
             'age' => 'required|integer|min:0',
             'health_status' => 'required|string|max:255',
             'boarding_expiry' => 'nullable|date',
+            'user_id' => 'required|exists:users,id'
         ];
     }
 
@@ -38,6 +39,8 @@ class PetRequest extends FormRequest
             'health_status.string' => 'Tình trạng sức khỏe phải là chuỗi ký tự',
             'health_status.max' => 'Tình trạng sức khỏe không được vượt quá 255 ký tự',
             'boarding_expiry.date' => 'Ngày hết hạn nội trú không hợp lệ',
+            'user_id.required' => 'Chủ sở hữu thú cưng là bắt buộc',
+            'user_id.exists' => 'Chủ sở hữu không tồn tại trong hệ thống',
         ];
     }
 }

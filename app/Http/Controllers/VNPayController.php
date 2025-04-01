@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Http\Requests\CreatePaymentRequest;
 use App\Services\VNPayServices;
 use App\Models\Order;
+use Illuminate\Http\Request;
+use App\Helpers\Helper;
 
 class VNPayController extends Controller
 {
@@ -21,15 +23,12 @@ class VNPayController extends Controller
         $order = Order::where('id', $data['order_id'])
             ->where('user_id', auth()->id())
             ->firstOrFail();
+
         if ($order->status != 1) {
-            return response()->json([
-                'status' => 400,
-                'message' => 'Đơn hàng không thể thanh toán do trạng thái không phù hợp!',
-            ], 400);
+            return Helper::apiResponse(400, 'Đơn hàng không thể thanh toán do trạng thái không phù hợp!');
         }
 
-        return response()->json([
-            'status' => 200,
+        return Helper::apiResponse(200, 'Tạo URL thanh toán thành công', [
             'payment_url' => $this->vnPayService->createPaymentUrl($order)
         ]);
     }
@@ -39,18 +38,12 @@ class VNPayController extends Controller
         $validation = $this->vnPayService->validateResponse($request);
 
         if (!$validation['status']) {
-            return response()->json([
-                'status' => 400,
-                'message' => $validation['message'],
-            ], 400);
+            return Helper::apiResponse(400, $validation['message']);
         }
 
         $order = Order::find($validation['order_id']);
         if (!$order) {
-            return response()->json([
-                'status' => 404,
-                'message' => 'Không tìm thấy đơn hàng!',
-            ], 404);
+            return Helper::apiResponse(404, 'Không tìm thấy đơn hàng!');
         }
 
         if ($validation['transaction_status'] === '00') {
@@ -59,9 +52,6 @@ class VNPayController extends Controller
             return redirect()->away(config('app.frontend_url') . '/success');
         }
 
-        return response()->json([
-            'status' => 400,
-            'message' => 'Giao dịch thất bại!'
-        ], 400);
+        return Helper::apiResponse(400, 'Giao dịch thất bại!');
     }
 }
