@@ -33,7 +33,7 @@ class VNPayServices
             "vnp_Locale" => "vn",
             "vnp_OrderInfo" => "Thanh toán đơn hàng #{$order->id}",
             "vnp_OrderType" => "billpayment",
-            "vnp_ReturnUrl" => $this->vnp_Returnurl,
+            "vnp_ReturnUrl" => config('app.frontend_url') . '/success',
             "vnp_TxnRef" => $order->id,
         ];
 

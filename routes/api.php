@@ -126,4 +126,5 @@ Route::get('/categories/{category_id}/products', [ProductController::class, 'get
 Route::get('services', [ServicesController::class, 'index']);
 Route::get('services/{id}', [ServicesController::class, 'show']);
 
+Route::post('/orders/update-status', [OrderController::class, 'updateStatus']);
 Route::get('/vnpay/return', [VNPayController::class, 'vnpayReturn']);

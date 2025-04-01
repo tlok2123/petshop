@@ -2,12 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 class OrderController extends Controller
 {
@@ -81,5 +81,54 @@ class OrderController extends Controller
         $order->delete();
 
         return response()->json(['status' => 200, 'message' => 'Đơn hàng đã được hủy.'], 200);
+    }
+
+    // API mới để cập nhật trạng thái đơn hàng từ VNPay
+    public function updateStatus(Request $request)
+    {
+        // Validate request từ frontend
+        $request->validate([
+            'order_id' => 'required|exists:orders,id',
+            'transaction_status' => 'required|string',
+        ]);
+
+        $orderId = $request->input('order_id');
+        $transactionStatus = $request->input('transaction_status');
+
+        // Tìm đơn hàng
+        $order = Order::find($orderId);
+        if (!$order) {
+            return response()->json([
+                'status' => 404,
+                'message' => 'Không tìm thấy đơn hàng!',
+            ], 404);
+        }
+
+        // Kiểm tra trạng thái giao dịch từ VNPay
+        if ($transactionStatus === '00') {
+            // Kiểm tra trạng thái hiện tại của đơn hàng
+            if ($order->status == 1) {
+                $order->status = 2; // Cập nhật từ 1 thành 2 (hoàn thành)
+                $order->save();
+
+                Log::info('Order status updated via VNPay', ['order_id' => $order->id, 'new_status' => 2]);
+
+                return response()->json([
+                    'status' => 200,
+                    'message' => 'Cập nhật trạng thái đơn hàng thành công!',
+                    'data' => $order,
+                ], 200);
+            } else {
+                return response()->json([
+                    'status' => 400,
+                    'message' => 'Đơn hàng không ở trạng thái chờ xử lý!',
+                ], 400);
+            }
+        }
+
+        return response()->json([
+            'status' => 400,
+            'message' => 'Giao dịch không thành công!',
+        ], 400);
     }
 }

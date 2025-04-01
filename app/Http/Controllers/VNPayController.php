@@ -33,12 +33,12 @@ class VNPayController extends Controller
         }
 
         return response()->json([
-            'status' => 'success',
+            'status' => 200,
             'payment_url' => $this->vnPayService->createPaymentUrl($order)
         ]);
     }
 
-    public function vnpayReturn(Request $request): \Illuminate\Http\JsonResponse
+    public function vnpayReturn(Request $request)
     {
         $validation = $this->vnPayService->validateResponse($request);
 
@@ -58,12 +58,10 @@ class VNPayController extends Controller
         }
 
         if ($validation['transaction_status'] === '00') {
-            $order->status = 2; // Cập nhật trạng thái thành công
+            $order->status = 2;
             $order->save();
-            return response()->json([
-                'status' => 200,
-                'message' => 'Thanh toán thành công!',
-            ]);
+            // Redirect về trang success của frontend
+            return redirect()->away(config('app.frontend_url') . '/success');
         }
 
         return response()->json([
