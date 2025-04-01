@@ -2,8 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\StorePaymentRequest;
-use Illuminate\Http\Request;
+use App\Http\Requests\CreatePaymentRequest;
 use App\Services\VNPayServices;
 use App\Models\Order;
 
@@ -16,16 +15,13 @@ class VNPayController extends Controller
         $this->vnPayService = $vnPayService;
     }
 
-    public function createPayment(Request $request): \Illuminate\Http\JsonResponse
+    public function createPayment(CreatePaymentRequest $request): \Illuminate\Http\JsonResponse
     {
-
-        // Lấy đơn hàng từ order_id
-        $order = Order::where('id', $request->order_id)
-            ->where('user_id', auth()->id()) // Đảm bảo đơn hàng thuộc về user
+        $data = $request->validated();
+        $order = Order::where('id', $data['order_id'])
+            ->where('user_id', auth()->id())
             ->firstOrFail();
-
-        // Kiểm tra trạng thái đơn hàng
-        if ($order->status != 1) { // Giả sử 1 là "Đang xử lý"
+        if ($order->status != 1) {
             return response()->json([
                 'status' => 400,
                 'message' => 'Đơn hàng không thể thanh toán do trạng thái không phù hợp!',
@@ -60,7 +56,6 @@ class VNPayController extends Controller
         if ($validation['transaction_status'] === '00') {
             $order->status = 2;
             $order->save();
-            // Redirect về trang success của frontend
             return redirect()->away(config('app.frontend_url') . '/success');
         }
 

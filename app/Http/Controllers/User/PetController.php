@@ -3,9 +3,9 @@
 namespace App\Http\Controllers\User;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\User\PetRequest;
 use App\Models\Pet;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class PetController extends Controller
@@ -21,17 +21,11 @@ class PetController extends Controller
     /**
      * Store a newly created pet in storage.
      */
-    public function store(Request $request): JsonResponse
+    public function store(PetRequest $request): JsonResponse
     {
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'species' => 'required|integer|in:1,2',
-            'age' => 'required|integer|min:0',
-            'health_status' => 'required|string',
-            'boarding_expiry' => 'nullable|date',
-        ]);
+        $data = $request->validated();
 
-        $pet = Pet::create(array_merge($validated, ['user_id' => Auth::id()]));
+        $pet = Pet::create(array_merge($data, ['user_id' => Auth::id()]));
 
         return response()->json([
             'status' => '201',
@@ -47,7 +41,8 @@ class PetController extends Controller
         if ($pet->user_id !== Auth::id()) {
             return response()->json([
                 'status' => 403,
-                'message' => 'Không tìm thấy người dùng'], 403);
+                'message' => 'Không tìm thấy người dùng'
+            ], 403);
         }
         return response()->json([
             'status' => 200,
@@ -58,23 +53,18 @@ class PetController extends Controller
     /**
      * Update the specified pet in storage.
      */
-    public function update(Request $request, Pet $pet): JsonResponse
+    public function update(PetRequest $request, Pet $pet): JsonResponse
     {
         if ($pet->user_id !== Auth::id()) {
             return response()->json([
                 'status' => 403,
-                'message' => 'Không tìm thấy người dùng'], 403);
+                'message' => 'Không tìm thấy người dùng'
+            ], 403);
         }
 
-        $validated = $request->validate([
-            'name' => 'sometimes|string|max:255',
-            'species' => 'sometimes|integer|in:1,2',
-            'age' => 'sometimes|integer|min:0',
-            'health_status' => 'sometimes|string',
-            'boarding_expiry' => 'nullable|date',
-        ]);
+        $data = $request->validated();
+        $pet->update($data);
 
-        $pet->update($validated);
         return response()->json([
             'status' => 200,
             'pet' => $pet
@@ -89,12 +79,14 @@ class PetController extends Controller
         if ($pet->user_id !== Auth::id()) {
             return response()->json([
                 'status' => 403,
-                'message' => 'Không tìm thấy người dùng'], 403);
+                'message' => 'Không tìm thấy người dùng'
+            ], 403);
         }
 
         $pet->delete();
         return response()->json([
             'status' => 200,
-            'message' => 'Xóa thú cưng thành công']);
+            'message' => 'Xóa thú cưng thành công'
+        ]);
     }
 }

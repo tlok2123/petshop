@@ -3,9 +3,8 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Admin\CategoryRequest;
 use App\Models\Category;
-use App\Models\Pet;
-use Illuminate\Http\Request;
 
 class CategoryController extends Controller
 {
@@ -20,13 +19,9 @@ class CategoryController extends Controller
         return view('admin.category.create');
     }
 
-    public function store(Request $request)
+    public function store(CategoryRequest $request)
     {
-        $request->validate([
-            'name' => 'required|string|max:255',
-        ]);
-
-        Category::create($request->all());
+        Category::create($request->validated());
 
         return redirect()->route('admin.category.index')->with('success', 'Thêm danh mục thành công!');
     }
@@ -38,17 +33,13 @@ class CategoryController extends Controller
 
     public function show($id)
     {
-        $category = Category::findOrFail($id); // Tìm danh mục theo ID
-        return view('admin.category.show', compact('category')); // Truyền dữ liệu vào view
+        $category = Category::findOrFail($id);
+        return view('admin.category.show', compact('category'));
     }
 
-    public function update(Request $request, Category $category)
+    public function update(CategoryRequest $request, Category $category)
     {
-        $request->validate([
-            'name' => 'required|string|max:255',
-        ]);
-
-        $category->update($request->all());
+        $category->update($request->validated());
 
         return redirect()->route('admin.category.index')->with('success', 'Cập nhật danh mục thành công!');
     }

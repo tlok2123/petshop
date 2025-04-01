@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\User\CategoryController;
+use App\Http\Controllers\User\OrderController;
 use App\Http\Controllers\User\PetController;
 use App\Http\Controllers\User\ProductController;
 use App\Http\Controllers\User\ServicesController;
@@ -12,7 +13,7 @@ use Firebase\JWT\JWT;
 use Firebase\JWT\Key;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\OrderController;
+
 // 🔹 Đăng ký & đăng nhập
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login'])->name('login');

@@ -3,10 +3,9 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Admin\PetRequest;
 use App\Models\Pet;
-use Illuminate\Http\Request;
 use App\Models\User;
-
 
 class PetController extends Controller
 {
@@ -22,17 +21,9 @@ class PetController extends Controller
         return view('admin.pets.create', compact('users'));
     }
 
-    public function store(Request $request)
+    public function store(PetRequest $request)
     {
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'species' => 'required|string|max:255',
-            'age' => 'required|integer|min:0',
-            'health_status' => 'required|string|max:255',
-            'boarding_expiry' => 'nullable|date',
-        ]);
-
-        Pet::create($request->all());
+        Pet::create($request->validated());
 
         return redirect()->route('admin.pets.index')->with('success', 'Thêm thú cưng thành công');
     }
@@ -50,17 +41,9 @@ class PetController extends Controller
         return view('admin.pets.show', compact('pet'));
     }
 
-    public function update(Request $request, Pet $pet)
+    public function update(PetRequest $request, Pet $pet)
     {
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'species' => 'required|string|max:255',
-            'age' => 'required|integer|min:0',
-            'health_status' => 'required|string|max:255',
-            'boarding_expiry' => 'nullable|date',
-        ]);
-
-        $pet->update($request->all());
+        $pet->update($request->validated());
 
         return redirect()->route('admin.pets.index')->with('success', 'Cập nhật thành công');
     }

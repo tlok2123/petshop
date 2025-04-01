@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\User;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
+use App\Http\Requests\User\UpdateProfileRequest;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 
@@ -29,21 +29,13 @@ class UserController extends Controller
         ], 200);
     }
 
-
     /**
      * Cập nhật thông tin cá nhân của người dùng.
      */
-    public function updateProfile(Request $request)
+    public function updateProfile(UpdateProfileRequest $request)
     {
         $user = Auth::user();
-
-        $validated = $request->validate([
-            'name' => 'string|max:255',
-            'email' => 'email|unique:users,email,' . $user->id,
-            'phone' => 'nullable|string|max:10',
-            'address' => 'nullable|string|max:255',
-            'avatar' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-        ]);
+        $data = $request->validated();
 
         // Nếu có avatar mới thì cập nhật, nếu không thì giữ nguyên
         if ($request->hasFile('avatar')) {
@@ -53,13 +45,13 @@ class UserController extends Controller
             }
             // Lưu ảnh mới
             $avatarPath = $request->file('avatar')->store('avatars', 'public');
-            $validated['avatar'] = $avatarPath;
+            $data['avatar'] = $avatarPath;
         } else {
             // Nếu không có avatar mới, giữ nguyên avatar cũ
-            $validated['avatar'] = $user->avatar;
+            $data['avatar'] = $user->avatar;
         }
 
-        $user->update($validated);
+        $user->update($data);
 
         return response()->json([
             'status' => 200,
@@ -74,5 +66,4 @@ class UserController extends Controller
             ]
         ], 200);
     }
-
 }

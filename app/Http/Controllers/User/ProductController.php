@@ -14,13 +14,10 @@ class ProductController extends Controller
     {
         try {
             $products = Product::with('category')->paginate(10);
-
-            // Thêm đường dẫn ảnh cho từng sản phẩm
             $products->getCollection()->transform(function ($product) {
                 $product->image_url = $product->photo ? asset('storage/' . $product->photo) : null;
                 return $product;
             });
-
             return response()->json([
                 'status' => '200',
                 'message' => 'Lấy danh sách sản phẩm thành công',
@@ -39,10 +36,7 @@ class ProductController extends Controller
     {
         try {
             $product->load('category');
-
-            // Thêm đường dẫn ảnh
             $product->image_url = $product->photo ? asset('storage/' . $product->photo) : null;
-
             return response()->json([
                 'status' => '200',
                 'message' => 'Lấy sản phẩm thành công',
@@ -67,7 +61,6 @@ class ProductController extends Controller
                 $product->image_url = $product->photo ? url('storage/' . $product->photo) : null;
                 return $product;
             });
-
             return response()->json([
                 'status' => 200,
                 'message' => 'Lấy danh sách sản phẩm theo danh mục thành công',

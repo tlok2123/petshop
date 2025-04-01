@@ -3,9 +3,9 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-use App\Models\Product;
+use App\Http\Requests\Admin\ProductRequest;
 use App\Models\Category;
+use App\Models\Product;
 use Illuminate\Support\Facades\Storage;
 
 class ProductController extends Controller
@@ -25,18 +25,9 @@ class ProductController extends Controller
         return view('admin.product.create', compact('categories'));
     }
 
-    public function store(Request $request)
+    public function store(ProductRequest $request)
     {
-
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'price' => 'required|integer|min:0',
-            'category_id' => 'required|exists:categories,id',
-            'stock' => 'required|integer|min:0',
-            'description' => 'required|string',
-            'photo' => 'nullable|image|mimes:jpg,png,jpeg|max:2048',
-        ]);
-
+        $data = $request->validated();
 
         $photoPath = null;
         if ($request->hasFile('photo')) {
@@ -44,14 +35,7 @@ class ProductController extends Controller
             $photoPath = $request->file('photo')->storeAs('photos', $photoName, 'public');
         }
 
-        Product::create([
-            'name' => $request->name,
-            'price' => $request->price,
-            'category_id' => $request->category_id,
-            'stock' => $request->stock,
-            'description' => $request->description,
-            'photo' => $photoPath,
-        ]);
+        Product::create(array_merge($data, ['photo' => $photoPath]));
 
         return redirect()->route('admin.product.index')->with('success', 'Thêm sản phẩm thành công!');
     }
@@ -67,30 +51,19 @@ class ProductController extends Controller
         return view('admin.product.edit', compact('product', 'categories'));
     }
 
-    public function update(Request $request, Product $product)
+    public function update(ProductRequest $request, Product $product)
     {
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'price' => 'required|integer|min:0',
-            'category_id' => 'required|exists:categories,id',
-            'stock' => 'required|integer|min:0',
-            'description' => 'required|string',
-            'photo' => 'nullable|image|mimes:jpg,png,jpeg|max:2048',
-        ]);
-
-
-        $updateData = $request->only(['name', 'price', 'category_id', 'stock', 'description']);
+        $data = $request->validated();
 
         if ($request->hasFile('photo')) {
             if ($product->photo) {
                 Storage::disk('public')->delete($product->photo);
             }
-
             $photoName = time() . '.' . $request->file('photo')->extension();
-            $updateData['photo'] = $request->file('photo')->storeAs('photos', $photoName, 'public');
+            $data['photo'] = $request->file('photo')->storeAs('photos', `time() . '.' . $photoName`, 'public');
         }
 
-        $product->update($updateData);
+        $product->update($data);
 
         return redirect()->route('admin.product.index')->with('success', 'Đã cập nhật sản phẩm');
     }

@@ -64,18 +64,37 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
         document.addEventListener("DOMContentLoaded", function () {
+            // Khai báo biến và gán dữ liệu từ PHP
+            const weeklyLabels = {!! json_encode($weeklyLabels ?? []) !!};
+            const orderData = {!! json_encode($orderData ?? []) !!};
+            const appointmentData = {!! json_encode($appointmentData ?? []) !!};
+
+            // Debug dữ liệu
+            console.log('Labels:', weeklyLabels);
+            console.log('Order Data:', orderData);
+            console.log('Appointment Data:', appointmentData);
+
             const ctx = document.getElementById('revenueChart').getContext('2d');
             new Chart(ctx, {
                 type: 'bar',
                 data: {
-                    labels: {!! json_encode($weeklyLabels ?? []) !!},
-                    datasets: [{
-                        label: 'Doanh thu (VNĐ)',
-                        data: {!! json_encode($weeklyRevenue ?? []) !!},
-                        backgroundColor: 'rgba(54, 162, 235, 0.6)',
-                        borderColor: 'rgba(54, 162, 235, 1)',
-                        borderWidth: 1
-                    }]
+                    labels: weeklyLabels,
+                    datasets: [
+                        {
+                            label: 'Doanh thu đơn hàng (VNĐ)',
+                            data: orderData,
+                            backgroundColor: 'rgba(54, 162, 235, 0.6)',
+                            borderColor: 'rgba(54, 162, 235, 1)',
+                            borderWidth: 1
+                        },
+                        {
+                            label: 'Doanh thu dịch vụ (VNĐ)',
+                            data: appointmentData,
+                            backgroundColor: 'rgba(255, 99, 132, 0.6)',
+                            borderColor: 'rgba(255, 99, 132, 1)',
+                            borderWidth: 1
+                        }
+                    ]
                 },
                 options: {
                     responsive: true,
