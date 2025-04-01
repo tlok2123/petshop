@@ -6,6 +6,7 @@ use App\Http\Controllers\User\PetController;
 use App\Http\Controllers\User\ProductController;
 use App\Http\Controllers\User\ServicesController;
 use App\Http\Controllers\User\UserController;
+use App\Http\Controllers\VNPayController;
 use App\Models\User;
 use Firebase\JWT\JWT;
 use Firebase\JWT\Key;
@@ -113,7 +114,7 @@ Route::middleware('auth:api')->group(function () {
     Route::put('/pets/{pet}', [PetController::class, 'update']);
     Route::delete('/pets/{pet}', [PetController::class, 'destroy']);
 
-
+    Route::post('/checkout', [VNPayController::class, 'createPayment']);
 
 });
 
@@ -125,4 +126,4 @@ Route::get('/categories/{category_id}/products', [ProductController::class, 'get
 Route::get('services', [ServicesController::class, 'index']);
 Route::get('services/{id}', [ServicesController::class, 'show']);
 
-
+Route::get('/vnpay/return', [VNPayController::class, 'vnpayReturn']);
