@@ -15,11 +15,10 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-// Routes cho Admin Authentication
+
 Route::get('/admin/login', [AdminAuthController::class, 'showLoginForm'])->name('admin.login');
 Route::post('/admin/login', [AdminAuthController::class, 'login']);
 
-// Routes dành cho Admin (có middleware bảo vệ)
 Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::resource('product', ProductController::class);
     Route::resource('orders', OrderController::class);
@@ -32,6 +31,5 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::resource('category', CategoryController::class);
     Route::resource('pets', PetController::class);
 
-    // Route Logout Admin
     Route::post('/logout', [AdminAuthController::class, 'logout'])->name('logout');
 });

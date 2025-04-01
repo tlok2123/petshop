@@ -1,6 +1,8 @@
 <?php
 
+use App\Http\Controllers\EmailVerificationController;
 use App\Http\Controllers\Auth\AuthController;
+use App\Http\Controllers\User\AppointmentController;
 use App\Http\Controllers\User\CategoryController;
 use App\Http\Controllers\User\OrderController;
 use App\Http\Controllers\User\PetController;
@@ -8,124 +10,72 @@ use App\Http\Controllers\User\ProductController;
 use App\Http\Controllers\User\ServicesController;
 use App\Http\Controllers\User\UserController;
 use App\Http\Controllers\VNPayController;
-use App\Models\User;
-use Firebase\JWT\JWT;
-use Firebase\JWT\Key;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
-// 🔹 Đăng ký & đăng nhập
-Route::post('/register', [AuthController::class, 'register']);
-Route::post('/login', [AuthController::class, 'login'])->name('login');
-
-// 🔹 Xác thực email bằng JWT
-Route::get('/email/verify/{id}/{token}', function ($id, $token) {
-    try {
-        $decoded = JWT::decode($token, new Key(env('JWT_SECRET'), 'HS256'));
-
-        if ($decoded->id != $id) {
-            return response()->json(['message' => 'Token không hợp lệ'], 400);
-        }
-
-        $user = User::findOrFail($id);
-
-        if ($user->hasVerifiedEmail()) {
-            return response()->json(['message' => 'Email đã được xác minh trước đó'], 200);
-        }
-
-        $user->markEmailAsVerified();
-
-        return response()->json(['message' => 'Xác minh email thành công']);
-    } catch (\Exception $e) {
-        return response()->json(['message' => 'Token không hợp lệ hoặc đã hết hạn'], 400);
-    }
-})->middleware('throttle:6,1')->name('verification.verify');
-
-// 🔹 Xác thực email bằng JWT (token từ query params)
-Route::get('/verify-email', function (Request $request) {
-    $token = $request->query('token');
-
-    if (!$token) {
-        return response()->json(['message' => 'Token không hợp lệ'], 400);
-    }
-
-    try {
-        $decoded = JWT::decode($token, new Key(env('JWT_SECRET'), 'HS256'));
-
-        $user = User::findOrFail($decoded->id);
-
-        if ($user->hasVerifiedEmail()) {
-            return response()->json([
-                'status' => 200,
-                'message' => 'Email đã được xác minh trước đó'], 200);
-        }
-
-        $user->markEmailAsVerified();
-
-        return response()->json([
-            'status' => 200,
-            'message' => 'Xác minh email thành công']);
-    } catch (\Exception $e) {
-        return response()->json([
-            'status' => 400,
-            'message' => 'Token không hợp lệ hoặc đã hết hạn'], 400);
-    }
-})->middleware('throttle:6,1')->name('verification.verify.query');
-
-// 🔹 Gửi lại email xác minh
-Route::post('/email/verify/resend', function (Request $request) {
-    if (!$request->user()) {
-        return response()->json([
-            'status' => 401,
-            'message' => 'Vui lòng đăng nhập để tiếp tục'
-        ], 401);
-    }
-
-    $request->user()->sendEmailVerificationNotification();
-
-    return response()->json([
-        'status' => 200,
-        'message' => 'Mail đã được gửi lại'
-    ], 200);
-})->middleware(['auth:api', 'throttle:6,1'])->name('verification.send');
-
-// 🔹 API yêu cầu đăng nhập
-Route::middleware('auth:api')->group(function () {
-    Route::get('/user', function (Request $request) {
-        return response()->json([
-            'status' => 200,
-            'message' => 'Đăng nhập thành công',
-        ], 200);
-    });
-    Route::post('/logout', [AuthController::class, 'logout']);
-    Route::get('/user/profile', [UserController::class, 'getProfile']);
-    Route::post('/user/profile', [UserController::class, 'updateProfile']);
-
-    //Quản lí đơn hàng
-    Route::get('/orders', [OrderController::class, 'index'])->name('orders.index'); // Danh sách đơn hàng của người dùng
-    Route::post('/orders', [OrderController::class, 'store'])->name('orders.store'); // Tạo đơn hàng mới
-    Route::get('/orders/{order}', [OrderController::class, 'show'])->name('orders.show'); // Xem chi tiết đơn hàng
-    Route::put('/orders/{order}', [OrderController::class, 'update'])->name('orders.update'); // Cập nhật trạng thái đơn hàng
-    Route::delete('/orders/{order}', [OrderController::class, 'destroy'])->name('orders.destroy'); // Hủy đơn hàng
-
-    // 🔹 Quản lý Pet
-    Route::post('/pets', [PetController::class, 'store']);
-    Route::get('/pets', [PetController::class, 'index']);
-    Route::get('/pets/{pet}', [PetController::class, 'show']);
-    Route::put('/pets/{pet}', [PetController::class, 'update']);
-    Route::delete('/pets/{pet}', [PetController::class, 'destroy']);
-
-    Route::post('/checkout', [VNPayController::class, 'createPayment']);
-
+// 🔹 Authentication Routes (Không yêu cầu đăng nhập)
+Route::prefix('auth')->group(function () {
+    Route::post('/register', [AuthController::class, 'register'])->name('auth.register');
+    Route::post('/login', [AuthController::class, 'login'])->name('auth.login');
 });
 
-// 🔹 Lấy danh sách sản phẩm (Không yêu cầu đăng nhập)
-Route::get('/products', [ProductController::class, 'index']);
-Route::get('/products/{product}', [ProductController::class, 'show']);
-Route::get('/categories', [CategoryController::class, 'index']);
-Route::get('/categories/{category_id}/products', [ProductController::class, 'getByCategory']);
-Route::get('services', [ServicesController::class, 'index']);
-Route::get('services/{id}', [ServicesController::class, 'show']);
+// 🔹 Email Verification Routes
+Route::prefix('email')->middleware('throttle:6,1')->group(function () {
+    Route::get('/verify/{id}/{token}', [EmailVerificationController::class, 'verify'])->name('verification.verify');
+    Route::get('/verify', [EmailVerificationController::class, 'verifyByQuery'])->name('verification.verify.query');
+    Route::post('/verify/resend', [EmailVerificationController::class, 'resend'])
+        ->middleware('auth:api')
+        ->name('verification.send');
+});
 
-Route::post('/orders/update-status', [OrderController::class, 'updateStatus']);
-Route::get('/vnpay/return', [VNPayController::class, 'vnpayReturn']);
+
+Route::group([], function () {
+    Route::get('/products', [ProductController::class, 'index'])->name('products.index');
+    Route::get('/products/{product}', [ProductController::class, 'show'])->name('products.show');
+    Route::get('/categories', [CategoryController::class, 'index'])->name('categories.index');
+    Route::get('/categories/{category_id}/products', [ProductController::class, 'getByCategory'])->name('categories.products');
+    Route::get('/services', [ServicesController::class, 'index'])->name('services.index');
+    Route::get('/services/{id}', [ServicesController::class, 'show'])->name('services.show');
+});
+
+
+Route::middleware('auth:api')->group(function () {
+    // User Profile
+    Route::prefix('user')->group(function () {
+        Route::get('/', function (Request $request) {
+            return response()->json(['status' => 200, 'message' => 'Đăng nhập thành công'], 200);
+        })->name('user.check');
+        Route::post('/logout', [AuthController::class, 'logout'])->name('auth.logout');
+        Route::get('/profile', [UserController::class, 'getProfile'])->name('user.profile.get');
+        Route::post('/profile', [UserController::class, 'updateProfile'])->name('user.profile.update');
+    });
+
+
+    Route::prefix('orders')->group(function () {
+        Route::get('/', [OrderController::class, 'index'])->name('orders.index');
+        Route::post('/', [OrderController::class, 'store'])->name('orders.store');
+        Route::get('/{order}', [OrderController::class, 'show'])->name('orders.show');
+        Route::put('/{order}', [OrderController::class, 'update'])->name('orders.update');
+        Route::delete('/{order}', [OrderController::class, 'destroy'])->name('orders.destroy');
+        Route::post('/update-status', [OrderController::class, 'updateStatus'])->name('orders.update-status');
+    });
+
+    // Pets (CRUD)
+    Route::prefix('pets')->group(function () {
+        Route::get('/', [PetController::class, 'index'])->name('pets.index');
+        Route::post('/', [PetController::class, 'store'])->name('pets.store');
+        Route::get('/{pet}', [PetController::class, 'show'])->name('pets.show');
+        Route::put('/{pet}', [PetController::class, 'update'])->name('pets.update');
+        Route::delete('/{pet}', [PetController::class, 'destroy'])->name('pets.destroy');
+    });
+
+    // Appointments
+    Route::prefix('book')->group(function () {
+        Route::get('/', [AppointmentController::class, 'book'])->name('appointments.book');
+        Route::post('/', [AppointmentController::class, 'store'])->name('appointments.store');
+    });
+
+    // Payment
+    Route::post('/checkout', [VNPayController::class, 'createPayment'])->name('checkout.create');
+    Route::get('/vnpay/return', [VNPayController::class, 'vnpayReturn'])->name('vnpay.return');
+});
